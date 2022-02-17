@@ -1,0 +1,43 @@
+# version: "3"
+# services:
+#   datadog-python:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     volumes:
+#       - ./:/code
+#       # Datadog configuration.
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - /proc/:/host/proc/:ro
+#       - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+#     environment:
+#       - DD_API_KEY=47b0753ad17e2eba7b1cb54099dce0e3
+#       - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+#     container_name: datadog-python
+
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/code
+    environment:
+      - DATADOG_AGENT=datadog # used to initialize the Datadog library
+    container_name: app
+
+  # Run datadog agent in a container.
+  datadog:
+    container_name: datadog
+    image: datadog/agent:latest
+    environment:
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_SITE=datadoghq.eu # required if datadog site is https://app.datadoghq.eu/
+      - DD_API_KEY=<API KEY HERE>
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+    links:
+      - app
